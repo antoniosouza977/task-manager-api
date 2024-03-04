@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\Projects;
 use App\Http\Requests\Projects\StoreProjectRequest;
 use App\Http\Requests\Projects\UpdateProjectRequest;
 use App\Models\Project;
-use App\Repositories\ProjectsRepository;
+use App\Repositories\EloquentRepository;
 use App\Services\GitHub;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -13,25 +13,25 @@ use Illuminate\Support\Facades\Http;
 
 class ProjectsController
 {
-    private ProjectsRepository $repository;
+    private EloquentRepository $repository;
     private string $git_hub_url = 'https://api.github.com';
     private array $basic_relations = ['authors'];
 
-    public function __construct(ProjectsRepository $projectsRepository)
+    public function __construct(Project $projectModel)
     {
-        $this->repository = $projectsRepository;
+        $this->repository = new EloquentRepository($projectModel);
     }
 
     public function index(): JsonResponse
     {
         $user = Auth::user();
 
-        return response()->json($user->projects()->with($this->basic_relations)->get());
+        return response()->json($this->repository->getCollectionFromAnUser($user, 'projects', $this->basic_relations));
     }
 
     public function show(Project $project): JsonResponse
     {
-        $project->load($this->basic_relations);
+        $project = $this->repository->loadModelRelations($project, $this->basic_relations);
 
         return response()->json($project);
 
@@ -42,11 +42,10 @@ class ProjectsController
         if ($this->ownerCheck($project)) {
 
             if (isset($request['authors'])) {
-                $project->authors()->sync($request['authors']);
+                $this->repository->syncModelRelation($project, 'authors', $request['authors']);
             }
-            $project->load($this->basic_relations);
 
-            return response()->json($this->repository->update($project, $request->all()));
+            return response()->json($this->repository->updateModel($project, $request->all()));
         }
 
         return response()->json(['message' => 'Usuário ' . Auth::user()->name . ' não é autor do projeto.']);
@@ -67,8 +66,8 @@ class ProjectsController
             'git_hub_url' => $github_project_repo['html_url']
         ];
 
-        $project = $this->repository->store($project_data);
-        $project->authors()->sync($request['authors']);
+        $project = $this->repository->storeNewModel($project_data);
+        $this->repository->syncModelRelation($project, 'authors', $request['authors']);
 
         return response()->json($project);
 
@@ -77,8 +76,7 @@ class ProjectsController
     public function destroy(Project $project): JsonResponse
     {
         if ($this->ownerCheck($project)) {
-            $project->authors()->sync([]);
-            $project->delete();
+            $this->repository->destroyModelAndDetachRelations($project, ['authors']);
 
             return response()->json(['message' => 'Registro deletado com sucesso!']);
         }
@@ -102,7 +100,7 @@ class ProjectsController
     public function ownerCheck($project): bool
     {
         $user = Auth::user();
-        $project->load('authors');
+        $project = $this->repository->loadModelRelations($project, ['authors']);
 
         return $project->authors->contains($user);
     }
