@@ -1,0 +1,42 @@
+version: "3.7"
+
+networks:
+  proxy:
+    external: true
+  task_manager:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www
+    networks:
+      - task_manager
+      - proxy
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    networks:
+      - task_manager
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    volumes:
+      - redis:/data
+    networks:
+      - task_manager
+
+volumes:
+  mariadb_data:
+  redis:
