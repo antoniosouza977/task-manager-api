@@ -6,11 +6,11 @@ networks:
   task_manager:
 
 services:
-  app:
+  api:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: app
+    container_name: api
     restart: unless-stopped
     volumes:
       - .:/var/www
@@ -26,14 +26,6 @@ services:
     volumes:
       - ./:/var/www
       - ./docker/nginx/:/etc/nginx/conf.d/
-    networks:
-      - task_manager
-
-  redis:
-    container_name: redis
-    image: redis:latest
-    volumes:
-      - redis:/data
     networks:
       - task_manager
 
