@@ -20,9 +20,9 @@ class TaskCategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        //
+        return response()->json($this->repository->getPaginatedUserCollection($request['per_page'] ?? 10));
     }
 
     /**
@@ -45,9 +45,17 @@ class TaskCategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id): \Illuminate\Http\JsonResponse
     {
-        //
+        $record = $this->repository->getUserRecordById($id);
+
+        if (!$record) {
+            return response()->json([
+                'message' => 'Registro não encontrado.'
+            ], 404);
+        }
+
+        return response()->json($record);
     }
 
     /**

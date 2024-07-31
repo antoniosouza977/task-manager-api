@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class TaskCategory extends Model
 {
     protected $table = 'task_categories';
+
     protected $fillable = [
         'name',
         'active',
         'user_id'
+    ];
+
+    protected $casts = [
+        'active' => 'boolean'
     ];
 
     public function tasks(): \Illuminate\Database\Eloquent\Relations\HasMany
