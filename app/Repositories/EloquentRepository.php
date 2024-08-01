@@ -11,7 +11,7 @@ class EloquentRepository
 
     public function __construct()
     {
-        $this->model = app($this->modelClass);
+        $this->model = app($this->modelClass ?? Model::class);
     }
 
     public function store(array $data): Model
