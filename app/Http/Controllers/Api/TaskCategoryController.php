@@ -4,73 +4,43 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskCategory\StoreTaskCategory;
+use App\Http\Requests\TaskCategory\UpdateTaskCategory;
+use App\Http\Services\ResponseMessage;
 use App\Repositories\TaskCategoryRepository;
-use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class TaskCategoryController extends Controller
 {
-
-    private TaskCategoryRepository $repository;
-
     public function __construct(TaskCategoryRepository $repository)
     {
         $this->repository = $repository;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): \Illuminate\Http\JsonResponse
-    {
-        return response()->json($this->repository->getPaginatedUserCollection($request['per_page'] ?? 10));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreTaskCategory $request): \Illuminate\Http\JsonResponse
     {
-        if ($this->repository->getByname($request['name'])) {
+        if ($this->repository->getUserRecordBy('name', $request['name'])) {
             return response()->json([
                 'message' => 'Já existe uma categoria com esse nome.'
-            ], 400);
+            ], ResponseAlias::HTTP_BAD_REQUEST);
         }
 
         $data = $request->all();
         $data['user_id'] = auth()->id();
 
-        return response()->json($this->repository->store($data));
+        return response()->json($this->repository->store($data), ResponseAlias::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id): \Illuminate\Http\JsonResponse
+    public function update(int $id, UpdateTaskCategory $request): \Illuminate\Http\JsonResponse
     {
-        $record = $this->repository->getUserRecordById($id);
+        $record = $this->repository->getUserRecordBy('id', $id);
 
         if (!$record) {
             return response()->json([
-                'message' => 'Registro não encontrado.'
-            ], 404);
+                'message' => ResponseMessage::REGISTRO_NAO_ENCONTRADO
+            ], ResponseAlias::HTTP_NOT_FOUND);
         }
 
-        return response()->json($record);
+        return response()->json($this->repository->update($record, $request->validated()), ResponseAlias::HTTP_OK);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }

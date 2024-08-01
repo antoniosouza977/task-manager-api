@@ -5,7 +5,7 @@ namespace App\Http\Requests\TaskCategory;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreTaskCategory extends FormRequest
+class UpdateTaskCategory extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +23,7 @@ class StoreTaskCategory extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|min:3|max:50',
+            'name' => 'string|min:3|max:50',
             'active' => 'boolean',
         ];
     }
@@ -31,7 +31,7 @@ class StoreTaskCategory extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nome obrigatório',
+            'name.string' => 'O campo nome deve ser do tipo texto',
             'name.min' => 'Nome deve ter pelo menos 3 caracteres',
             'name.max' => 'Nome deve ter no máximo 50 caracteres',
             'active.boolean' => 'O campo ativo deve ser boleano',

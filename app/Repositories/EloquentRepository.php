@@ -19,6 +19,18 @@ class EloquentRepository
         return $this->model->newQuery()->create($data);
     }
 
+    public function update(Model $model, array $data): Model
+    {
+        $model->update($data);
+
+        return $model;
+    }
+
+    public function destroy(Model $model): void
+    {
+        $model->delete();
+    }
+
     public function getPaginatedUserCollection(int $itemsPerPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->model->newQuery()
@@ -26,9 +38,13 @@ class EloquentRepository
             ->paginate($itemsPerPage);
     }
 
-    public function getUserRecordById(int $recordId)
+    public function getUserRecordBy(string $field, string $value): null|Model
     {
-        return $this->model->newQuery()->find($recordId);
+        return $this->model
+            ->newQuery()
+            ->where('user_id', auth()->id())
+            ->where($field, $value)
+            ->first();
     }
 
 }
