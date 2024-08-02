@@ -4,8 +4,9 @@ namespace App\Http\Requests\TaskCategory;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreTaskCategory extends FormRequest
+class StoreTaskCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,18 +24,23 @@ class StoreTaskCategory extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|min:3|max:50',
+            'name'   => [
+                'bail',
+                'required',
+                'string',
+                'min:3',
+                'max:50',
+                Rule::unique('task_categories', 'name')->where('user_id', $this->user()->id)
+            ],
             'active' => 'boolean',
         ];
     }
 
-    public function messages(): array
+    public function attributes(): array
     {
         return [
-            'name.required' => 'Nome obrigatório',
-            'name.min' => 'Nome deve ter pelo menos 3 caracteres',
-            'name.max' => 'Nome deve ter no máximo 50 caracteres',
-            'active.boolean' => 'O campo ativo deve ser boleano',
+            'name'   => 'nome',
+            'active' => 'ativo',
         ];
     }
 }

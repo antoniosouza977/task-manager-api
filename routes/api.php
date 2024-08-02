@@ -6,6 +6,7 @@ require_once "api/auth.php";
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     require_once "api/task_category.php";
+    require_once "api/task.php";
 });
 
 

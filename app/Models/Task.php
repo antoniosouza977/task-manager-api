@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Observers\TaskObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 
+#[ObservedBy([TaskObserver::class])]
 class Task extends Model
 {
     protected $table = 'tasks';
+
     protected $fillable = [
         'description',
         'completed',
@@ -14,6 +18,8 @@ class Task extends Model
         'task_category_id',
         'user_id'
     ];
+
+    protected $with = ['category'];
 
     public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

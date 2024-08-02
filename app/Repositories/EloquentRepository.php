@@ -19,11 +19,13 @@ class EloquentRepository
         return $this->model->newQuery()->create($data);
     }
 
-    public function update(Model $model, array $data): Model
+    public function update(array $data): Model
     {
-        $model->update($data);
+        $this->model
+            ->where('id', $data['id'])
+            ->update($data);
 
-        return $model;
+        return $this->model->find($data['id']);
     }
 
     public function destroy(Model $model): void

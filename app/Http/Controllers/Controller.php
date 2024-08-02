@@ -12,7 +12,8 @@ use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class Controller extends BaseController
 {
-    use AuthorizesRequests, ValidatesRequests;
+    use AuthorizesRequests;
+    use ValidatesRequests;
 
     /**
      *
@@ -22,7 +23,10 @@ class Controller extends BaseController
 
     public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        return response()->json($this->repository->getPaginatedUserCollection($request['per_page'] ?? 10), ResponseAlias::HTTP_OK);
+        return response()->json(
+            $this->repository->getPaginatedUserCollection($request['per_page'] ?? 10),
+            ResponseAlias::HTTP_OK
+        );
     }
 
     public function show(string $id): \Illuminate\Http\JsonResponse
@@ -37,6 +41,7 @@ class Controller extends BaseController
 
         return response()->json($record, ResponseAlias::HTTP_OK);
     }
+
     public function destroy(int $id): \Illuminate\Http\JsonResponse
     {
         $record = $this->repository->getUserRecordBy('id', $id);
